@@ -1,43 +1,335 @@
 <html>
     <head>
         <title></title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
-        <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="apple-mobile-web-app-capable" content="yes" /> <meta name="mobile-web-app-capable" content="yes" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <link rel="stylesheet" href="css/style.css" />
+        <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <style>
+            .error {
+                color: red;
+            }
+            .errordesc{
+                display: none;
+            }
+            .error .errordesc{
+                display: unset;
+            }
+            .relOverlay {
+                top: 0;
+                left: 0;
+                position: relative;
+                background: rgb(255, 255, 255);
+                width: 100%;
+                height: 100%;
+                z-index: 100;
+            }
+            .overlay{
+                top: 0;
+                left: 0;
+                position: absolute;
+                background: rgb(255, 255, 255);
+                width: 100%;
+                height: 100%;
+                z-index: 100;
+            }
+            .vcenter{
+                margin: 0;
+                position: absolute;
+                text-align: center;
+                top: 50%;
+                width: 100%;
+                -ms-transform: translateY(-50%);
+                transform: translateY(-50%);
+            }
+            #SSIDsList{
+                list-style: none;
+                padding-left: 0px;
+            }
+            #SSIDsList li{
+                border: solid silver 1px;
+                padding: 3px;
+                margin-bottom: 5px;
+                display: flex;
+            }
+            #SSIDsList li>*:first-child {
+                flex-grow: 2;
+            }
+            #SSIDsList li:hover{
+                background: silver;
+            }
+        </style>
     </head>
     <body>
-        <input type="text" name="ip" id="espIp" value="192.168.8.101">
-        <table>
-            <tr>
-                <td>
-                    Releu 1 <br>
-                    <input type="checkbox" checked name="relay1" data-toggle="toggle" onchange="toggle(this)">
-                </td>
-                <td>
-                    Releu 2 <br>
-                    <input type="checkbox" checked name="relay2" data-toggle="toggle" onchange="toggle(this)">
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Releu 3 <br>
-                    <input type="checkbox" checked name="relay3" data-toggle="toggle" onchange="toggle(this)">
-                </td>
-                <td>
-                    Releu 4 <br>
-                    <input type="checkbox" checked name="relay4" data-toggle="toggle" onchange="toggle(this)">
-                </td>
-            </tr>
-        </table>
-        <script
-			  src="https://code.jquery.com/jquery-3.6.0.min.js"
-			  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-			  crossorigin="anonymous"></script>
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
-            <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-        <script>
-            function toggle(src) {
-                $.get("http://"+$("#espIp").val()+"/"+src.name+"/"+(src.checked?1:0));
+<!--    <div id="loading" class="overlay">-->
+<!--        <div class="vcenter"><img src="img/loading.gif" width="50px"><br>Loading</div>-->
+<!--    </div>-->
+    <div id="loading" class="overlay">
+        <div class="vcenter"><img src="img/loading.gif" width="50px"><br>Loading</div>
+    </div>
+    <div id="connectingUdev" class="overlay" style="display: none">
+        <div class="vcenter"><img src="img/loading.gif" width="50px"><br>Connecting to uDev</div>
+    </div>
+    <div id="connectingWlan" class="overlay" style="display: none">
+        <div class="vcenter"><img src="img/loading.gif" width="50px"><br>Connecting to WiFi<br><span id="connStatus"></span></div>
+    </div>
+
+    <div id="noConnToUdev" class="overlay" style="display: none">
+        <div class="vcenter">
+            Could not connect to uDev. <br>
+            <div class="card bg-light m-2" style="width: 400px; display: inline-block; text-align: left;">
+                <div class="card-body" >
+                    Possible reasons:
+                    <ul>
+                        <li>uDev is not in setup mode.</li>
+                        <li>You are not connect to uDev wifi.</li>
+                        <li>
+                            Using the wrong IP. Update it here
+                            <form onsubmit="event.preventDefault();updateIp(this)">
+                                <div class="input-group mb-3">
+                                    <input required type="text" class="form-control" placeholder="192.168.4.1" id="ip" name="ip" aria-label="Recipient's username" aria-describedby="button-addon2">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary"  type="button" onclick="updateIp(this.form)">Update</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div><br>
+            
+            <button class="btn-primary btn btn-sm">Open WiFi settings</button>
+            <a class="btn-secondary btn btn-sm" href="./">Try again</a>
+        </div>
+    </div>
+
+    <main role="main" class="container">
+        <form id="wifiConnectionForm">
+            <div class="form-group" id="ssidInputGroup">
+                <label for="ssidInput">SSID</label>
+                <div class="input-group mb-3">
+                    <input required type="text" class="form-control" placeholder="WiFi BSSID" id="ssidInput" name="ssid" aria-label="Recipient's username" aria-describedby="button-addon2">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" onclick="browseSSIDs()">Browse SSIDs</button>
+                    </div>
+                </div>
+                <small id="ssidInputErr" class="errordesc form-text text-muted">Could not connect to selected SSID</small>
+            </div>
+            <div class="form-group">
+                <label for="encTypeInput">Security</label>
+                <select name="encType" id="encTypeInput" class="custom-select ">
+                    <option>None</option>
+                    <option>WEP</option>
+                    <option>WPA</option>
+                    <option>WPA2</option>
+                    <option>Auto</option>
+                </select>
+            </div>
+            <div class="form-group" id="WPAKeyInputGroup">
+                <label for="WPAKeyInput">WPA Key</label>
+                <input type="text" class="form-control" id="WPAKeyInput" name="key" placeholder="Optional WPA Key">
+                <small id="WPAKeyInputErr" class="errordesc form-text text-muted">Could not connect to selected SSID</small>
+            </div>
+            <button class="btn btn-success" type="button" onclick="connectUdev(this.form)">Connect</button>
+        </form>
+        <form id="apiConfigForm" style="display: none">
+            <div class="form-group">
+                <label for="apiUrlInput">API Url</label>
+                <input type="text" name="api" class="form-control" id="apiUrlInput">
+            </div>
+            <div class="form-group">
+                <label for="apiKeyInput">API Key</label>
+                <input type="text" name="key" class="form-control" id="apiKeyInput">
+            </div>
+            <button class="btn btn-success" type="button" onclick="testApi(this.form)">Connect API</button>
+        </form>
+        <div id="saveConfigDialog">
+            Setup completed.
+            <button class="btn btn-success" onclick="saveConfig()">Save configuration</button>
+        </div>
+    </main>
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let udevURL = "http://192.168.4.1";
+        function updateIp(form) {
+            udevURL="http://" + form.ip.value;
+            connectToUdev();
+        }
+        function saveConfig() {
+            fetch(udevURL+"/save");
+        }
+        async function connectToUdev() {
+            $("body>*").hide();
+            $("#loading").show();
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+            try {
+                let response = await fetch(udevURL,{signal:controller.signal});
+                let status = await response.json();
+                if(status.mode && status.mode=="setup") {
+                    console.log("Mode setup");
+                    $("main").show();
+                    $("#loading").hide();
+                    //fetchConnStatus();
+                }
             }
-        </script>
+            catch (e) {
+                console.log(e);
+                $("#noConnToUdev").show();
+                $("#loading").hide();
+            }
+        }
+
+        $("document").ready(function(d){
+            connectToUdev();
+        });
+
+        function browseSSIDs() {
+            $("#ssidSelModal").modal();
+            fetchSSIDList();
+        }
+
+        function fetchSSIDList() {
+            $("#SSIDsStartScanButt").attr("disabled",true);
+            $("#wait4ssids").parent().children().hide();
+            $("#wait4ssids").show();
+            // $("#SSIDsList").show();
+            // return;
+            //let data = ["ATMOSPHERE INTERIOR DESIGN|-82|WPA2","DIGI-24-C314|-79|Auto","Pieton @ Blume|-83|WPA2","Smart Body|-85|Auto","Sky Marketing #staysafe|-81|Auto","Armour AFC TECH|-77|WPA2","Insight2.4|-67|WPA2","1_LuqasPc_|-85|Auto","Bob|-75|Auto","Programmatik|-78|WPA2","sftaccl24|-57|WPA2","Event Architects|-90|WPA2"];
+            //$("#wait4ssids").hide();
+            //publishSSIDs(data);
+            //return;
+            fetch(udevURL+"/ssids")
+                .then(function (res) {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return res.json();
+                })
+                .then((data)=>{
+                    $("#wait4ssids").hide();
+                    publishSSIDs(data);
+                })
+                .catch(function (err) {
+                    console.log(err);
+                    $("#wait4ssids").hide();
+                    $("#SSIDsRetrieveErr").show().text(err);
+                })
+        }
+
+        function publishSSIDs(data) {
+            $("#SSIDsStartScanButt").removeAttr("disabled")
+            $("#SSIDsList").show().empty();
+            if(!data || data.length===0) {
+                $("#SSIDsListEmpty").show();
+                return;
+            }
+            data.forEach(function (item) {
+                let $li = $("<li style='display: flex'>").appendTo("#SSIDsList");
+                let itemData = item.split("|");
+                let aaa = {"ssid":itemData[0],"encType":itemData[2]};
+                $li
+                    .html("<span>"+itemData[0]+"</span><span>"+itemData[1]+"</span><span>"+itemData[2]+"</span>")
+                    .on("click",(ev=>selectSSID(aaa)));
+            });
+        }
+        function selectSSID(data) {
+            $("#ssidSelModal").modal("hide");
+            $("#encTypeInput").val(data.encType);
+            $("#ssidInput").val(data.ssid);
+        }
+    </script>
+    <script>
+        async function testApi(frm) {
+            try {
+                let response = await fetch(udevURL+"/testapi?api="+frm.api.value+"&key=");
+                if(response.ok) {
+
+                }
+                let text = await response.text();
+            }
+            catch(error) {
+                console.log(text);
+            }
+            
+            
+        }
+
+        function connectUdev(form) {
+            console.log("connecting device to ");
+            $(".error").removeClass("error");
+            $("#connStatus").empty();
+
+            let url = udevURL+"/connect?ssid="+encodeURI(form.ssid.value);
+            if(($(form.key).val()).length>0) {
+                url += "&psk="+$(form.key).val();
+            }
+            $("#connectingWlan").show();
+            fetch(url).then(function (res) {
+                if([200,204].indexOf(res.status)===-1) {
+                    // show some error
+                    return;
+                }
+                fetchConnStatus();
+            })
+        }
+
+        async function fetchConnStatus() {
+            let response = await  fetch(udevURL+"/connstatus");
+            let text = await response.text();
+            $("#connStatus").text(text);
+            $("#connectingWlan").hide();
+            switch (text) {
+                case "WL_DISCONNECTED":
+                    $("#connectingWlan").show();
+                    setTimeout(fetchConnStatus, 2000);
+                    return;
+                case "WL_NO_SSID_AVAIL":
+                    $("#ssidInputGroup").addClass("error");
+                    break;
+                case "WL_WRONG_PASSWORD":
+                    $("#WPAKeyInputGroup").addClass("error");
+                    break;
+                case "WL_CONNECTED":
+                    $("#apiConfigForm").show();
+                    $("#wifiConnectionForm").hide();
+                    break;
+                case "WL_IDLE":
+                    $("#apiConfigForm").hide();
+                    $("#wifiConnectionForm").show();
+                    break;
+
+            }
+        }
+
+    </script>
+    <div class="modal" tabindex="-1" role="dialog" id="ssidSelModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">List WiFi</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="relOverlay" id="wait4ssids" style="min-height: 200px">
+                        <div class="vcenter"><img src="img/loading.gif" width="50px"><br>Loading</div>
+                    </div>
+                    <div id="SSIDsListEmpty" style="display: none">No SSIDs found</div>
+                    <div id="SSIDsRetrieveErr" style="display: none"></div>
+                    <ul id="SSIDsList"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="fetchSSIDList()" id="SSIDsStartScanButt">Refresh</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     </body>
 </html>

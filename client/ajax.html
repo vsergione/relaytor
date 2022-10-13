@@ -1,0 +1,39 @@
+<html>
+    <head>
+        <title></title>
+    </head>
+    <body>
+        
+        <button onclick="clickMe()">Click me</button>
+        <textarea id="debug"></textarea>
+        <script>
+            function clickMe() {
+                fetch("http://localhost/dbapi/v2/spaleck/users/")
+                .then(function(response){
+                    response.json()
+                        .then(function(data){
+                            document.getElementById("debug").value = data.meta.totalRecords;
+                        })
+                        .catch(function(err){
+                            console.log(err);
+                        })
+                })
+                .catch((err)=>{console.log(err)})
+            }
+
+            async function clickMe() {
+                try {
+                    url = "http://loscalhost/dbapi/v2/spaleck/users/";
+                    //url = "https://google.com"
+                    let response = await fetch(url);
+                    let data = await response.json();
+                    document.getElementById("debug").value = data.meta.totalRecords;
+                }
+                catch(e) {
+                    console.log(e.message);
+                    //console.log();
+                }
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "additionalFiles": "",
+  "builtInLibrariesFolders": "/home/vsergiu/arduino-1.8.19/libraries",
+  "builtInToolsFolders": "/home/vsergiu/arduino-1.8.19/tools-builder,/home/vsergiu/arduino-1.8.19/hardware/tools/avr,/home/vsergiu/.arduino15/packages",
+  "compiler.optimization_flags": "",
+  "customBuildProperties": "build.path=/home/vsergiu/work/relaytor/build,build.warn_data_percentage=75,runtime.tools.python3.path=/home/vsergiu/.arduino15/packages/esp8266/tools/python3/3.7.2-post1,runtime.tools.python3-3.7.2-post1.path=/home/vsergiu/.arduino15/packages/esp8266/tools/python3/3.7.2-post1,runtime.tools.xtensa-lx106-elf-gcc.path=/home/vsergiu/.arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/3.0.4-gcc10.3-1757bed,runtime.tools.xtensa-lx106-elf-gcc-3.0.4-gcc10.3-1757bed.path=/home/vsergiu/.arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/3.0.4-gcc10.3-1757bed,runtime.tools.mkspiffs.path=/home/vsergiu/.arduino15/packages/esp8266/tools/mkspiffs/3.0.4-gcc10.3-1757bed,runtime.tools.mkspiffs-3.0.4-gcc10.3-1757bed.path=/home/vsergiu/.arduino15/packages/esp8266/tools/mkspiffs/3.0.4-gcc10.3-1757bed,runtime.tools.mklittlefs.path=/home/vsergiu/.arduino15/packages/esp8266/tools/mklittlefs/3.0.4-gcc10.3-1757bed,runtime.tools.mklittlefs-3.0.4-gcc10.3-1757bed.path=/home/vsergiu/.arduino15/packages/esp8266/tools/mklittlefs/3.0.4-gcc10.3-1757bed",
+  "fqbn": "esp8266:esp8266:espino:xtal=80,vt=flash,exception=disabled,stacksmash=disabled,ssl=all,mmu=3232,non32xfer=fast,ResetMethod=nodemcu,eesz=4M2M,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200",
+  "hardwareFolders": "/home/vsergiu/arduino-1.8.19/hardware,/home/vsergiu/.arduino15/packages",
+  "otherLibrariesFolders": "/home/vsergiu/Arduino/libraries",
+  "runtime.ide.version": "10819",
+  "sketchLocation": "/home/vsergiu/work/relaytor/stuff/10_setup.ino"
+}
